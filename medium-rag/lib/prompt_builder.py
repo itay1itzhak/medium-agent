@@ -37,12 +37,19 @@ def build_context_str(matches: list) -> str:
 
 
 def call_llm(system_prompt: str, user_prompt: str) -> str:
-    resp = get_client().chat.completions.create(
-        model=LLM_MODEL,
-        messages=[
+    kwargs = {
+        "model": LLM_MODEL,
+        "messages": [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt},
-        ],
-        max_tokens=600,
-    )
+        ]
+    }
+    
+    if "4UHRUIN" in LLM_MODEL:
+        kwargs["max_tokens"] = 600
+        kwargs["temperature"] = 0.0  # Pass temperature specifically for the university models
+    else:
+        kwargs["max_completion_tokens"] = 600
+
+    resp = get_client().chat.completions.create(**kwargs)
     return resp.choices[0].message.content
