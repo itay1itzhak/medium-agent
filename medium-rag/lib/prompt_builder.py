@@ -20,10 +20,7 @@ def build_system_prompt() -> str:
 
 
 def build_user_prompt(question: str, context_str: str) -> str:
-    return (
-        f"Context from Medium articles:\n\n{context_str}\n\n"
-        f"Question: {question}"
-    )
+    return f"Context from Medium articles:\n\n{context_str}\n\n" f"Question: {question}"
 
 
 def build_context_str(matches: list) -> str:
@@ -42,12 +39,14 @@ def call_llm(system_prompt: str, user_prompt: str) -> str:
         "messages": [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt},
-        ]
+        ],
     }
-    
+
     if "4UHRUIN" in LLM_MODEL:
         kwargs["max_tokens"] = 600
-        kwargs["temperature"] = 0.0  # Pass temperature specifically for the university models
+        kwargs["temperature"] = (
+            0.0  # Pass temperature specifically for the university models
+        )
     else:
         kwargs["max_completion_tokens"] = 600
 
