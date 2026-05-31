@@ -2,13 +2,11 @@
   "version": 2,
   "builds": [
     { "src": "api/prompt.py", "use": "@vercel/python" },
-    { "src": "api/stats.py",  "use": "@vercel/python" },
-    { "src": "api/index.py",  "use": "@vercel/python" }
+    { "src": "api/stats.py",  "use": "@vercel/python" }
   ],
   "routes": [
     { "src": "/api/prompt", "dest": "/api/prompt.py" },
-    { "src": "/api/stats",  "dest": "/api/stats.py" },
-    { "src": "/", "dest": "/api/index.py" }
+    { "src": "/api/stats",  "dest": "/api/stats.py" }
   ],
   "functions": {
     "api/prompt.py": { "maxDuration": 60 }

@@ -1,12 +1,17 @@
 import sys
-import os
+import traceback
+from pathlib import Path
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from http.server import BaseHTTPRequestHandler
 import json
 
-from lib.rag_config import CHUNK_SIZE, OVERLAP_RATIO, TOP_K
+try:
+    from lib.rag_config import CHUNK_SIZE, OVERLAP_RATIO, TOP_K
+    IMPORT_ERROR = None
+except Exception as e:
+    IMPORT_ERROR = traceback.format_exc()
 
 CORS_HEADERS = {
     "Access-Control-Allow-Origin": "*",
@@ -24,6 +29,17 @@ class handler(BaseHTTPRequestHandler):
         self.end_headers()
 
     def do_GET(self):
+        if IMPORT_ERROR:
+            body = json.dumps({"error": "Import failed", "detail": IMPORT_ERROR}, ensure_ascii=False).encode("utf-8")
+            self.send_response(500)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(body)))
+            for k, v in CORS_HEADERS.items():
+                self.send_header(k, v)
+            self.end_headers()
+            self.wfile.write(body)
+            return
+
         result = {
             "chunk_size": CHUNK_SIZE,
             "overlap_ratio": OVERLAP_RATIO,

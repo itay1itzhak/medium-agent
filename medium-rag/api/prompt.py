@@ -1,20 +1,26 @@
 import sys
-import os
+import time
+import traceback
+from pathlib import Path
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from http.server import BaseHTTPRequestHandler
 import json
 
-from lib.rag_config import TOP_K
-from lib.embedder import get_embedding
-from lib.pinecone_client import query_index
-from lib.prompt_builder import (
-    build_system_prompt,
-    build_user_prompt,
-    build_context_str,
-    call_llm,
-)
+try:
+    from lib.rag_config import TOP_K
+    from lib.embedder import get_embedding
+    from lib.pinecone_client import query_index
+    from lib.prompt_builder import (
+        build_system_prompt,
+        build_user_prompt,
+        build_context_str,
+        call_llm,
+    )
+    IMPORT_ERROR = None
+except Exception as e:
+    IMPORT_ERROR = traceback.format_exc()
 
 
 CORS_HEADERS = {
@@ -33,6 +39,10 @@ class handler(BaseHTTPRequestHandler):
         self.end_headers()
 
     def do_POST(self):
+        if IMPORT_ERROR:
+            self._json(500, {"error": "Import failed", "detail": IMPORT_ERROR})
+            return
+
         try:
             content_length = int(self.headers.get("Content-Length", 0))
             body = json.loads(self.rfile.read(content_length))
@@ -45,9 +55,19 @@ class handler(BaseHTTPRequestHandler):
             self._json(400, {"error": '"question" field is required and must not be empty'})
             return
 
+        print(f"[prompt] question={question[:80]!r}")
+
         try:
+            t0 = time.time()
             query_vector = get_embedding(question)
+            ms = (time.time() - t0) * 1000
+            print(f"[prompt] embedded in {ms:.0f}ms")
+
+            t0 = time.time()
             matches = query_index(query_vector, top_k=TOP_K)
+            ms = (time.time() - t0) * 1000
+            top_score = matches[0].score if matches else float("nan")
+            print(f"[prompt] retrieved {len(matches)} chunks in {ms:.0f}ms, top score={top_score:.4f}")
 
             context_items = []
             for match in matches:
@@ -62,7 +82,11 @@ class handler(BaseHTTPRequestHandler):
             context_str = build_context_str(matches)
             system_prompt = build_system_prompt()
             user_prompt = build_user_prompt(question, context_str)
+
+            t0 = time.time()
             response_text = call_llm(system_prompt, user_prompt)
+            ms = (time.time() - t0) * 1000
+            print(f"[prompt] llm responded in {ms:.0f}ms, len={len(response_text)}")
 
             result = {
                 "response": response_text,
@@ -75,6 +99,8 @@ class handler(BaseHTTPRequestHandler):
             self._json(200, result)
 
         except Exception as e:
+            print(f"[prompt] ERROR: {e}", flush=True)
+            traceback.print_exc()
             self._json(503, {"error": f"Service error: {str(e)}"})
 
     def log_message(self, format, *args):
