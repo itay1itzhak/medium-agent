@@ -43,6 +43,6 @@ def call_llm(system_prompt: str, user_prompt: str) -> str:
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt},
         ],
-        max_completion_tokens=600,
+        max_tokens=600,
     )
     return resp.choices[0].message.content
