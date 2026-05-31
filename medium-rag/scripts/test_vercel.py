@@ -195,10 +195,15 @@ def test_prompt(base_url: str, question: str, q_index: int) -> dict:
     print(f"  {CYAN}{'─' * (box_width + 4)}{RESET}")
 
     # ── LLM Response ─────────────────────────────────────────────────────────
-    response_text = data.get("response", "")
+    response_text = data.get("response") or ""
     print(f"\n  {BOLD}{'─' * 3} LLM Response {'─' * 35}{RESET}")
-    for line in textwrap.wrap(response_text, width=WRAP):
-        print(f"  {line}")
+    print(f"  [raw repr] {repr(response_text[:120])}")   # always visible for debugging
+    if not response_text.strip():
+        print(f"  {RED}WARNING: response field is empty — model returned no visible text.{RESET}")
+        print(f"  Check Vercel function logs for [prompt] ERROR or finish_reason.")
+    else:
+        for line in textwrap.wrap(response_text, width=WRAP):
+            print(f"  {line}")
 
     # ── Augmented Prompt Preview ──────────────────────────────────────────────
     aug = data.get("Augmented_prompt", {})
@@ -214,7 +219,10 @@ def test_prompt(base_url: str, question: str, q_index: int) -> dict:
     print(f"  System ({sys_words} words): \"{sys_preview}...\"")
     print(f"  User   ({user_words} words): \"{user_preview}...\"")
 
-    return {"status": resp.status_code, "time_ms": elapsed_ms, "chunks": n_chunks, "ok": True}
+    response_ok = bool(response_text.strip())
+    if not response_ok:
+        print(f"  {RED}FAIL: response is empty.{RESET}")
+    return {"status": resp.status_code, "time_ms": elapsed_ms, "chunks": n_chunks, "ok": response_ok}
 
 
 # ─────────────────────────────────────────────────────────────────────────────
