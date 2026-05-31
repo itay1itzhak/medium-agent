@@ -17,7 +17,20 @@ from lib.prompt_builder import (
 )
 
 
+CORS_HEADERS = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type",
+}
+
+
 class handler(BaseHTTPRequestHandler):
+
+    def do_OPTIONS(self):
+        self.send_response(204)
+        for k, v in CORS_HEADERS.items():
+            self.send_header(k, v)
+        self.end_headers()
 
     def do_POST(self):
         try:
@@ -72,5 +85,7 @@ class handler(BaseHTTPRequestHandler):
         self.send_response(code)
         self.send_header("Content-Type", "application/json")
         self.send_header("Content-Length", str(len(body)))
+        for k, v in CORS_HEADERS.items():
+            self.send_header(k, v)
         self.end_headers()
         self.wfile.write(body)
