@@ -51,9 +51,19 @@ def call_llm(system_prompt: str, user_prompt: str) -> str:
         kwargs["max_completion_tokens"] = 4096
 
     resp = get_client().chat.completions.create(**kwargs)
-    content = resp.choices[0].message.content
+    choice = resp.choices[0]
+    content = choice.message.content
+    # Always log raw response details so Vercel function logs show exactly what the
+    # model returned (finish_reason, token usage, and repr of content).
+    print(
+        f"[llm] model={LLM_MODEL!r} "
+        f"finish_reason={choice.finish_reason!r} "
+        f"usage={resp.usage} "
+        f"content={repr(content)[:300]}",
+        flush=True,
+    )
     if not content or not content.strip():
-        finish_reason = resp.choices[0].finish_reason
+        finish_reason = choice.finish_reason
         raise ValueError(
             f"LLM returned empty content (finish_reason={finish_reason!r}). "
             "If finish_reason='length', increase max_completion_tokens further."
