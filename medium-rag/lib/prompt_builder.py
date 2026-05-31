@@ -44,11 +44,19 @@ def call_llm(system_prompt: str, user_prompt: str) -> str:
 
     if "4UHRUIN" in LLM_MODEL:
         kwargs["max_tokens"] = 600
-        kwargs["temperature"] = (
-            0.0  # Pass temperature specifically for the university models
-        )
+        kwargs["temperature"] = 0.0
     else:
-        kwargs["max_completion_tokens"] = 600
+        # o-series reasoning models: max_completion_tokens covers reasoning
+        # tokens + visible output together. 600 was too small — model used all
+        # tokens for internal reasoning, leaving nothing for visible response.
+        kwargs["max_completion_tokens"] = 4096
 
     resp = get_client().chat.completions.create(**kwargs)
-    return resp.choices[0].message.content
+    content = resp.choices[0].message.content
+    if not content:
+        finish_reason = resp.choices[0].finish_reason
+        raise ValueError(
+            f"LLM returned empty content (finish_reason={finish_reason!r}). "
+            "If finish_reason='length', increase max_completion_tokens further."
+        )
+    return content

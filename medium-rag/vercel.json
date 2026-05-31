@@ -9,5 +9,8 @@
     { "src": "/api/prompt", "dest": "/api/prompt.py" },
     { "src": "/api/stats",  "dest": "/api/stats.py" },
     { "src": "/", "dest": "/api/index.py" }
-  ]
+  ],
+  "functions": {
+    "api/prompt.py": { "maxDuration": 60 }
+  }
 }
