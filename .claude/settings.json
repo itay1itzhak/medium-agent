@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -c ' *)",
+      "Bash(vercel env *)",
+      "Bash(python scripts/index_articles.py)",
+      "Bash(grep \"\\\\.py$\")"
+    ]
+  }
+}

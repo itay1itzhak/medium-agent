@@ -14,7 +14,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import time
 from dotenv import load_dotenv
-load_dotenv()
+load_dotenv(override=True)
 
 from lib.embedder import get_embedding
 from lib.pinecone_client import query_index

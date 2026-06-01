@@ -13,7 +13,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import math
 from dotenv import load_dotenv
-load_dotenv()
+load_dotenv(override=True)
 
 from lib.embedder import get_embeddings_batch
 from lib.rag_config import EMBEDDING_MODEL, EMBEDDING_DIMS

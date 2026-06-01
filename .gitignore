@@ -3,3 +3,5 @@
 /Individual RAG Assignment.pdf
 /medium-english-50mb.csv
 /src
+.vercel
+.env*

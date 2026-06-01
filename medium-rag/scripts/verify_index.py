@@ -15,7 +15,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(override=True)
 
 from pinecone import Pinecone
 from lib.rag_config import PINECONE_API_KEY, PINECONE_INDEX_NAME

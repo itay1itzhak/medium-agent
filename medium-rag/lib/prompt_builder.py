@@ -43,9 +43,11 @@ def call_llm(system_prompt: str, user_prompt: str) -> str:
     }
 
     if "4UHRUIN" in LLM_MODEL:
-        # University proxy: requires max_tokens + temperature
-        kwargs["max_tokens"] = 600
-        kwargs["temperature"] = 0.0
+        # University proxy: requires max_tokens + temperature.
+        # 600 was too small — model defaulted to "I don't know" on synthesis
+        # questions rather than attempting an answer from the rich context.
+        kwargs["max_tokens"] = 1500
+        kwargs["temperature"] = 0.3
     else:
         # Real OpenAI models (gpt-5-mini, o1, o3 …): max_tokens is not supported
         kwargs["max_completion_tokens"] = 4096
