@@ -43,11 +43,12 @@ def call_llm(system_prompt: str, user_prompt: str) -> str:
     }
 
     if "4UHRUIN" in LLM_MODEL:
-        # University proxy: requires max_tokens + temperature.
-        # 600 was too small — model defaulted to "I don't know" on synthesis
-        # questions rather than attempting an answer from the rich context.
-        kwargs["max_tokens"] = 1500
-        kwargs["temperature"] = 0.3
+        # University proxy (gpt-5 family via litellm): only max_tokens is safe.
+        # Temperature is NOT passed — gpt-5 models only accept temperature=1
+        # (the default); passing any other value raises UnsupportedParamsError.
+        # max_tokens=600 fits within Vercel Hobby plan's 10 s function limit
+        # and is enough for complete answers at the model's default temperature.
+        kwargs["max_tokens"] = 600
     else:
         # Real OpenAI models (gpt-5-mini, o1, o3 …): max_tokens is not supported
         kwargs["max_completion_tokens"] = 4096
