@@ -45,13 +45,13 @@ def call_llm(system_prompt: str, user_prompt: str) -> str:
     if "4UHRUIN" in LLM_MODEL:
         # gpt-5 family via litellm course proxy.
         # • temperature is NOT passed — only temperature=1 (default) is accepted.
-        # • max_tokens (total budget) must NOT be used: the model consumes it for
-        #   internal reasoning, leaving 0 visible tokens → empty content.
-        #   max_completion_tokens caps only the *visible* output and lets reasoning
-        #   run freely, exactly like the real OpenAI o1/o3/gpt-5 APIs.
-        kwargs["max_completion_tokens"] = 600
+        # • max_tokens must be ≥ 1500 for 2600-token RAG contexts: the model uses
+        #   ~384 reasoning tokens before generating any visible output, and smaller
+        #   budgets (≤800) are entirely consumed by reasoning → empty content.
+        #   At 1500 the model completes naturally in ~8.4 s (within Vercel 10 s limit).
+        kwargs["max_tokens"] = 1500
     else:
-        # Real OpenAI models (gpt-5-mini, o1, o3 …): same parameter applies.
+        # Real OpenAI models (gpt-5-mini, o1, o3 …): max_tokens is not supported.
         kwargs["max_completion_tokens"] = 4096
 
     resp = get_client().chat.completions.create(**kwargs)
