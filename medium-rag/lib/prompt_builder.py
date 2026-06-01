@@ -49,7 +49,7 @@ def call_llm(system_prompt: str, user_prompt: str) -> str:
         #   ~384 reasoning tokens before generating any visible output, and smaller
         #   budgets (≤800) are entirely consumed by reasoning → empty content.
         #   At 1500 the model completes naturally in ~8.4 s (within Vercel 10 s limit).
-        kwargs["max_tokens"] = 1500
+        kwargs["max_tokens"] = 4096
     else:
         # Real OpenAI models (gpt-5-mini, o1, o3 …): max_tokens is not supported.
         kwargs["max_completion_tokens"] = 4096

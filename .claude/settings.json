@@ -4,7 +4,11 @@
       "Bash(python -c ' *)",
       "Bash(vercel env *)",
       "Bash(python scripts/index_articles.py)",
-      "Bash(grep \"\\\\.py$\")"
+      "Bash(grep \"\\\\.py$\")",
+      "Bash(vercel ls *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" https://medium-agent-93s6.vercel.app/api/stats)",
+      "Bash(curl -s https://medium-agent-93s6.vercel.app/api/stats)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" -X POST https://medium-agent-93s6.vercel.app/api/prompt -H \"Content-Type: application/json\" -d '{\"question\": \"What is the attention mechanism in transformers?\"}')"
     ]
   }
 }
