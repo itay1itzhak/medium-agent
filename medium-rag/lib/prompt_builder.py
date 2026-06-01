@@ -43,14 +43,15 @@ def call_llm(system_prompt: str, user_prompt: str) -> str:
     }
 
     if "4UHRUIN" in LLM_MODEL:
-        # University proxy (gpt-5 family via litellm): only max_tokens is safe.
-        # Temperature is NOT passed — gpt-5 models only accept temperature=1
-        # (the default); passing any other value raises UnsupportedParamsError.
-        # max_tokens=600 fits within Vercel Hobby plan's 10 s function limit
-        # and is enough for complete answers at the model's default temperature.
-        kwargs["max_tokens"] = 600
+        # gpt-5 family via litellm course proxy.
+        # • temperature is NOT passed — only temperature=1 (default) is accepted.
+        # • max_tokens (total budget) must NOT be used: the model consumes it for
+        #   internal reasoning, leaving 0 visible tokens → empty content.
+        #   max_completion_tokens caps only the *visible* output and lets reasoning
+        #   run freely, exactly like the real OpenAI o1/o3/gpt-5 APIs.
+        kwargs["max_completion_tokens"] = 600
     else:
-        # Real OpenAI models (gpt-5-mini, o1, o3 …): max_tokens is not supported
+        # Real OpenAI models (gpt-5-mini, o1, o3 …): same parameter applies.
         kwargs["max_completion_tokens"] = 4096
 
     resp = get_client().chat.completions.create(**kwargs)
